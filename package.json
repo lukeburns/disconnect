@@ -2,17 +2,11 @@
   "name": "disconnect",
   "description": "Connect middleware disconnected from http.",
   "version": "3.0.1",
-  "author": "TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)",
-  "contributors": [
-    "Douglas Christopher Wilson <doug@somethingdoug.com>",
-    "Jonathan Ong <me@jongleberry.com>",
-    "Tim Caswell <tim@creationix.com>"
-  ],
+  "author": "Luke Burns <lukemburns@gmail.com> (http://lukeburns.com)",
   "keywords": [
-    "framework",
-    "web",
     "middleware",
     "connect",
+    "disconnect",
     "rack"
   ],
   "repository": "lukeburns/disconnect",
