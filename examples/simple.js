@@ -1,25 +1,26 @@
-var connect = require('..'),
-		client = connect(),
-		client_name = connect();
+var disconnect = require('..');
+
+var client = disconnect();
+var name_handler = disconnect();
 
 /**
- * Name
+ * Name Handler
  **/
 
-// Get Name
-client_name.use(function(req, res, next) {
-	res = 'My name is ' + req.path.split('/')[2];
+// Format Name
+name_handler.use(function(req, res, next) {
+	res = 'My name is ' + req.path.split('/')[2]; // no reason client_name should expect name to be at [2] (should expect [1])
 	next(null, req, res);
 });
 
 // Capitalize Name
-client_name.use(function(req, res, next) {
+name_handler.use(function(req, res, next) {
 	res = res.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 	next(null, req, res);
 });
 
 /**
- * Main
+ * Main Handler
  **/
 
 // Tidy request
@@ -30,7 +31,11 @@ client.use(function(req, res, next) {
 	next(null, req, res);
 });
 
-client.use('/name', client_name);
+/**
+ * Call Main Handler
+ **/
+
+client.use('/name', name_handler);
 
 client('/name/luke', function(err, req, res) {
 	console.log(res);
