@@ -1,49 +1,25 @@
-# Disconnect: Connect middleware without a server
+# Disconnect: Connect middleware without the server
+[![Gitter chat](https://badges.gitter.im/lukeburns/disconnect.png)](https://gitter.im/lukeburns/disconnect)
 
 Connect middleware disconnected from http. Middleware can write to req and res.
 
 ```js
 var disconnect = require('disconnect');
-
 var client = disconnect();
-var name_handler = disconnect();
 
-/**
- * Name Handler
- **/
+// Middleware
+client.use(require('./files')); // read and write files
+client.use(require('./git')); // commit on write and retrieve log on write
 
-// Format Name
-name_handler.use(function(req, res, next) {
-	res = 'My name is ' + req.path.split('/')[2]; // no reason client_name should expect name to be at [2] (should expect [1])
-	next(null, req, res);
+// Write
+client({ method: 'put', path: 'Readme.md', data: "Here are some examples." }, function call(err, req, res) {
+	console.log(res.commit); // stdout from commit
 });
 
-// Capitalize Name
-name_handler.use(function(req, res, next) {
-	res = res.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-	next(null, req, res);
-});
-
-/**
- * Main Handler
- **/
-
-// Tidy request
-client.use(function(req, res, next) {
-	if(typeof req === 'string') {
-		req = { path: req, method: 'get' };
-	}
-	next(null, req, res);
-});
-
-/**
- * Call Main Handler
- **/
-
-client.use('/name', name_handler);
-
-client('/name/luke', function(err, req, res) {
-	console.log(res);
+// Read
+client('Readme.md', function(err, req, res) {
+	console.log(res.data); // file contents
+	console.log(res.log); // git log for file
 });
 ```
 
