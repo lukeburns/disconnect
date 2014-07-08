@@ -1,111 +1,51 @@
-# Connect
+# Disconnect: Connect middleware without a server
 
-[![NPM version](https://badge.fury.io/js/connect.svg)](http://badge.fury.io/js/connect)
-[![Build Status](https://travis-ci.org/senchalabs/connect.svg?branch=master)](https://travis-ci.org/senchalabs/connect)
-[![Coverage Status](https://img.shields.io/coveralls/senchalabs/connect.svg?branch=master)](https://coveralls.io/r/senchalabs/connect)
-
-  Connect is an extensible HTTP server framework for [node](http://nodejs.org) using "plugins" known as _middleware_.
+Connect middleware disconnected from http. Middleware can write to req and res.
 
 ```js
-var connect = require('connect')
-var http = require('http')
+var disconnect = require('disconnect');
 
-var app = connect()
+var client = disconnect();
+var name_handler = disconnect();
 
-// gzip/deflate outgoing responses
-var compression = require('compression')
-app.use(compression())
+/**
+ * Name Handler
+ **/
 
-// store session state in browser cookie
-var cookieSession = require('cookie-session')
-app.use(cookieSession({
-    keys: ['secret1', 'secret2']
-}))
+// Format Name
+name_handler.use(function(req, res, next) {
+	res = 'My name is ' + req.path.split('/')[2]; // no reason client_name should expect name to be at [2] (should expect [1])
+	next(null, req, res);
+});
 
-// parse urlencoded request bodies into req.body
-var bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded())
+// Capitalize Name
+name_handler.use(function(req, res, next) {
+	res = res.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+	next(null, req, res);
+});
 
-// respond to all requests
-app.use(function(req, res){
-  res.end('Hello from Connect!\n');
-})
+/**
+ * Main Handler
+ **/
 
-//create node.js http server and listen on port
-http.createServer(app).listen(3000)
+// Tidy request
+client.use(function(req, res, next) {
+	if(typeof req === 'string') {
+		req = { path: req, method: 'get' };
+	}
+	next(null, req, res);
+});
+
+/**
+ * Call Main Handler
+ **/
+
+client.use('/name', name_handler);
+
+client('/name/luke', function(err, req, res) {
+	console.log(res);
+});
 ```
-
-## Connect 3.0
-
-Connect 3.0 is in progress in the `master` branch. The main changes in Connect are:
-
-- Middleware will be moved to their own repositories in the [expressjs](http://github.com/expressjs) organization
-- All node patches will be removed - all middleware _should_ work without Connect and with similar frameworks like [restify](https://github.com/mcavage/node-restify)
-- Node `0.8` is no longer supported
-- The website documentation has been removed - view the markdown readmes instead
-
-If you would like to help maintain these middleware, please contact a [member of the expressjs team](https://github.com/orgs/expressjs/members).
-
-## Middleware
-
-These middleware and libraries are officially supported by the Connect/Express team:
-
-  - [body-parser](https://github.com/expressjs/body-parser) - previous `bodyParser`, `json`, and `urlencoded`. You may also be interested in:
-    - [body](https://github.com/raynos/body)
-    - [co-body](https://github.com/visionmedia/co-body)
-    - [raw-body](https://github.com/stream-utils/raw-body)
-  - [compression](https://github.com/expressjs/compression) - previously `compress`
-  - [connect-timeout](https://github.com/expressjs/timeout) - previously `timeout`
-  - [cookie-parser](https://github.com/expressjs/cookie-parser) - previously `cookieParser`
-  - [cookie-session](https://github.com/expressjs/cookie-session) - previously `cookieSession`
-  - [csurf](https://github.com/expressjs/csurf) - previousy `csrf`
-  - [errorhandler](https://github.com/expressjs/errorhandler) - previously `error-handler`
-  - [express-session](https://github.com/expressjs/session) - previously `session`
-  - [method-override](https://github.com/expressjs/method-override) - previously `method-override`
-  - [morgan](https://github.com/expressjs/morgan) - previously `logger`
-  - [response-time](https://github.com/expressjs/response-time) - previously `response-time`
-  - [serve-favicon](https://github.com/expressjs/serve-favicon) - previously `favicon`
-  - [serve-index](https://github.com/expressjs/serve-index) - previousy `directory`
-  - [serve-static](https://github.com/expressjs/serve-static) - previously `static`
-  - [vhost](https://github.com/expressjs/vhost) - previously `vhost`
-
-Most of these are exact ports of their Connect 2.x equivalents. The primary exception is `cookie-session`.
-
-Some middleware previously included with Connect are no longer supported by the Connect/Express team, are replaced by an alternative module, or should be superseded by a better module. Use one of these alternatives instead:
-
-  - `cookieParser`
-    - [cookies](https://github.com/jed/cookies) and [keygrip](https://github.com/jed/keygrip)
-  - `limit`
-    - [raw-body](https://github.com/stream-utils/raw-body)
-  - `multipart`
-    - [connect-multiparty](https://github.com/superjoe30/connect-multiparty)
-    - [connect-busboy](https://github.com/mscdex/connect-busboy)
-  - `query`
-    - [qs](https://github.com/visionmedia/node-querystring)
-  - `staticCache`
-    - [st](https://github.com/isaacs/st)
-    - [connect-static](https://github.com/andrewrk/connect-static)
-
-Checkout [http-framework](https://github.com/Raynos/http-framework/wiki/Modules) for many other compatible middleware! 
-
-## Running Tests
-
-```bash
-npm install
-npm test
-```
-
-## Contributors
-
- https://github.com/senchalabs/connect/graphs/contributors
-
-## Node Compatibility
-
-  - Connect `< 1.x` - node `0.2`
-  - Connect `1.x` - node `0.4`
-  - Connect `< 2.8` - node `0.6`
-  - Connect `>= 2.8 < 3` - node `0.8`
-  - Connect `>= 3` - node `0.10`
 
 ## License
 
