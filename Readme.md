@@ -9,7 +9,7 @@ var client = disconnect();
 
 // Middleware
 client.use(require('./files')); // read and write files
-client.use(require('./git')); // commit on write and retrieve log on write
+client.use(require('./git')); // commit writes + retrieve logs on reads
 
 // Write
 client({ method: 'put', path: 'Readme.md', data: "Here are some examples." }, function call(err, req, res) {
